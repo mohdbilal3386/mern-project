@@ -18,7 +18,10 @@ import "dotenv/config";
 
 const main = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/ecommerce");
+    //  for localhost
+    // await mongoose.connect("mongodb://localhost:27017/ecommerce");
+    // for cloud
+    await mongoose.connect(`${process.env.MONGODB_URL}`);
     console.log("successfully connected to MongoDB");
     // const _product = new Product({
     //   title: "test",
