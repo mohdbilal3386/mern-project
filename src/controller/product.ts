@@ -21,10 +21,26 @@ import { handleError } from "../utils/errorHandler";
 // const fileContent = getFileName("data.json");
 // const obj: ProductType[] = JSON.parse(fileContent.toString()).products;
 // @ts-ignore
-export const getAllProducts = async (_req: Request, res: Response) => {
+export const getAllProducts = async (req: Request, res: Response) => {
   try {
-    const response = await Product.find();
+    let query = Product.find();
+    let order: number = req.query.order === "desc" ? -1 : 1; // default is 1 for ascending order
+    let sort: string = typeof req.query.sort === "string" ? req.query.sort : "";
+    let limit: number =
+      typeof req.query.limit === "string" ? parseInt(req.query.limit) : 0;
+
+    // Only apply sorting and limiting if valid parameters are present
+    if (sort && (order === 1 || order === -1)) {
+      query = query.sort({ [sort]: order });
+    }
+    if (limit > 0) {
+      query = query.limit(limit);
+    }
+
+    const response = await query.exec();
     res.json(response);
+    // const response = await Product.find();
+    // res.json(response);
   } catch (err: unknown) {
     handleError(err, res);
   }
