@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 import "dotenv/config";
 import jwt from "jsonwebtoken";
 import { handleError } from "./utils/errorHandler";
+import { authRouter } from "./routes/authRouter";
 
 // mongoose configuration
 // mongoose.connect("mongodb://localhost:27017/ecommerce");
@@ -64,6 +65,7 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next();
 });
 app.use(express.json());
+app.use("/api/auth", authRouter);
 app.use("/api/products", auth, productRouter);
 app.use("/api/users", auth, userRouter);
 
