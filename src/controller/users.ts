@@ -1,7 +1,8 @@
 // import fs from "fs";
 // import path from "path";
 import { Request, Response } from "express";
-import { userType } from "../types/productType";
+import jwt from "jsonwebtoken";
+// import { userType } from "../types/productType";
 import { handleError } from "../utils/errorHandler";
 import { User } from "../model/user";
 
@@ -28,7 +29,8 @@ export const createUser = async (req: Request, res: Response) => {
   // users.push(req.body);
   // res.json(req.body);
   try {
-    const user = new User(req.body);
+    const token = jwt.sign({ email: req.body.email }, `${process.env.SECRET}`);
+    const user = new User({ ...req.body, token });
     const response = await user.save();
     res.status(201).json(response);
   } catch (err: unknown) {

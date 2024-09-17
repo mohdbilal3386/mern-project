@@ -4,6 +4,8 @@ import { productRouter } from "./routes/product";
 import { userRouter } from "./routes/user";
 import mongoose from "mongoose";
 import "dotenv/config";
+import jwt from "jsonwebtoken";
+import { handleError } from "./utils/errorHandler";
 
 // mongoose configuration
 // mongoose.connect("mongodb://localhost:27017/ecommerce");
@@ -36,17 +38,34 @@ const main = async () => {
 main();
 
 // MVC model-view-controller
-console.log(process.env.DB_PASSWORD);
 
 const app = express();
+// checking for user if he/she is valid user or not
+
+const auth = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.get("Authorization")?.split("Bearer ")[1];
+    console.log({ token });
+    const decoded = token && jwt.verify(token, `${process.env.SECRET}`);
+    // @ts-ignore
+    if (decoded.email) {
+      next();
+    } else {
+      res.sendStatus(404);
+    }
+    console.log({ decoded });
+  } catch (err) {
+    handleError(err, res);
+  }
+};
 app.use(morgan("dev"));
 app.use((req: Request, _res: Response, next: NextFunction) => {
   console.log(req.method, req.ip, req.hostname, req.get("User-Agent"));
   next();
 });
 app.use(express.json());
-app.use("/api/products", productRouter);
-app.use("/api/users", userRouter);
+app.use("/api/products", auth, productRouter);
+app.use("/api/users", auth, userRouter);
 
 app.listen(process.env.PORT, () => {
   console.log("Server started");
